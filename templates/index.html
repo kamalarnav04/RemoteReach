@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">    <title>RemoteReach</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            --transition-speed: 0.2s;
+            --border-radius-small: 6px;
+            --border-radius-medium: 12px;
+            --border-radius-large: 20px;
+        }
+
+        :root[data-theme="light"] {
+            --bg-color: #f7f9fc; /* Lighter, cleaner background */
+            --text-color: #2c3e50; /* Softer black */
+            --text-color-muted: #576c7f;
+            --section-bg: #ffffff;
+            --section-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Softer shadow */
+            --border-color: #e1e8ed; /* Lighter border */
+            --button-primary-bg: #3498db; /* Brighter blue */
+            --button-primary-text: #ffffff;
+            --button-primary-hover-bg: #2980b9;
+            --button-secondary-bg: #e9ecef;
+            --button-secondary-text: #2c3e50;
+            --button-secondary-hover-bg: #d3d9df;
+            --button-tertiary-bg: #9b59b6; /* Purple accent */
+            --button-tertiary-text: #ffffff;
+            --button-tertiary-hover-bg: #8e44ad;
+            --status-color: #7f8c8d;
+            --input-bg: #ffffff;
+            --input-border: #ced4da;
+            --slider-track-bg: #dee2e6;
+            --slider-thumb-bg: #3498db;
+        }
+        
+        :root[data-theme="dark"] {
+            --bg-color: #1a1d21; /* Darker, desaturated background */
+            --text-color: #e0e7ef; /* Lighter text */
+            --text-color-muted: #9fadbc;
+            --section-bg: #24292e; /* Slightly lighter dark for sections */
+            --section-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            --border-color: #3a4149; /* Softer dark border */
+            --button-primary-bg: #3498db; /* Consistent blue */
+            --button-primary-text: #ffffff;
+            --button-primary-hover-bg: #4aa3df;
+            --button-secondary-bg: #30363d;
+            --button-secondary-text: #e0e7ef;
+            --button-secondary-hover-bg: #3c424a;
+            --button-tertiary-bg: #9b59b6; /* Consistent purple */
+            --button-tertiary-text: #ffffff;
+            --button-tertiary-hover-bg: #a96bc8;
+            --status-color: #7e8c9a;
+            --input-bg: #2c3136;
+            --input-border: #4a5158;
+            --slider-track-bg: #3a4149;
+            --slider-thumb-bg: #3498db;
+        }
+
+        body {
+            font-family: var(--font-family-sans);
+            margin: 0;
+            padding: 20px;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--text-color);
+            font-weight: 600;
+            margin-bottom: 30px;
+        }        .container {
+            max-width: 100vw;
+            margin: 0;
+            padding: 0 0 80px 0; /* Add bottom padding for tab navigation */
+            overflow: hidden;
+        }        /* Swipe container for sections - now with better animations */
+        .swipe-container {
+            display: flex;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 300%; /* 3 sections side by side */
+            height: calc(100vh - 80px); /* Account for tab navigation */
+        }
+        
+        .swipe-section {
+            width: 33.333%; /* Each section takes 1/3 of container */
+            padding: 20px 15px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+          .swipe-section.center {
+            background: var(--section-bg);
+        }
+        
+        .swipe-section.left {
+            background: var(--section-bg);
+        }
+        
+        .swipe-section.right {
+            background: var(--section-bg);
+        }        /* Modern Tab Navigation */
+        .tab-navigation {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: var(--section-bg);
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .tab-container {
+            display: flex;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 16px 12px;
+            border: none;
+            background: none;
+            color: var(--text-color-muted);
+            font-size: 0.9em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-height: 70px;
+            justify-content: center;
+        }
+        
+        .tab-button:hover {
+            color: var(--text-color);
+            background: rgba(52, 152, 219, 0.1);
+        }
+        
+        .tab-button.active {
+            color: var(--button-primary-bg);
+            font-weight: 600;
+        }
+        
+        .tab-icon {
+            font-size: 1.4em;
+            margin-bottom: 2px;
+        }
+        
+        .tab-label {
+            font-size: 0.8em;
+            line-height: 1;
+        }
+          /* Active tab indicator */
+        .tab-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--button-primary-bg);
+            border-radius: 0 0 2px 2px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 33.333%;        }
+        
+        .section {
+            margin-bottom: 30px;
+            background-color: var(--section-bg);
+            border-radius: var(--border-radius-medium); /* Updated */
+            padding: 20px; /* Increased padding */
+            box-shadow: var(--section-shadow);
+            transition: background-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+        
+        h2 {
+            margin-top: 0;
+            margin-bottom: 20px; /* Increased margin */
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px; /* Increased padding */
+            font-weight: 600;
+            font-size: 1.4em;
+        }
+        
+        /* Theme toggle */
+        .theme-toggle {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px; /* Increased margin */
+        }
+        
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px; /* Adjusted size */
+            height: 28px; /* Adjusted size */
+        }
+        
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--slider-track-bg); /* Use theme variable */
+            transition: var(--transition-speed) ease;
+            border-radius: 28px; /* Adjusted size */
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px; /* Adjusted size */
+            width: 20px; /* Adjusted size */
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: var(--transition-speed) ease;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        input:checked + .slider {
+            background-color: var(--button-primary-bg); /* Use theme variable */
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(22px); /* Adjusted translation */
+        }
+        
+        .theme-label {
+            margin-right: 12px; /* Increased margin */
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+        
+        /* Control type toggle */
+        .control-toggle {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0 25px; /* Adjusted margin */
+        }
+        
+        .toggle-btn-group {
+            display: flex;
+            background-color: var(--input-bg); /* Use theme variable */
+            border-radius: var(--border-radius-large); /* Updated */
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .toggle-btn {
+            padding: 10px 22px; /* Adjusted padding */
+            border: none;
+            background: none;
+            font-size: 0.9em; /* Adjusted font size */
+            font-weight: 500; /* Adjusted font weight */
+            color: var(--text-color-muted); /* Use muted text color */
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
+            transition: color var(--transition-speed) ease;
+            width: 100px;  /* Adjusted width */
+            text-align: center;
+        }
+        
+        .toggle-btn.active {
+            color: var(--button-primary-text); /* Use theme variable for active text */
+        }
+        
+        .toggle-btn-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100px;  /* Match button width */
+            height: 100%;
+            background-color: var(--button-primary-bg); /* Use theme variable */
+            border-radius: var(--border-radius-large); /* Updated */
+            transition: transform var(--transition-speed) ease;
+            z-index: 0;
+        }
+        
+        /* Trackpad */
+        .trackpad-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .trackpad {
+            width: 100%; /* Make trackpad responsive */
+            max-width: 320px; /* Max width for larger screens */
+            height: 220px; /* Adjusted height */
+            background-color: var(--input-bg); /* Use theme variable */
+            border: 1px solid var(--border-color); /* Subtle border */
+            border-radius: var(--border-radius-medium); /* Updated */
+            touch-action: none;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.1);
+        }
+        
+        .trackpad-cursor {
+            position: absolute;
+            width: 10px; /* Smaller cursor */
+            height: 10px; /* Smaller cursor */
+            background-color: var(--button-primary-bg); /* Use theme variable */
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease; /* Added transform transition */
+        }        .trackpad-settings {
+            margin-top: 20px; /* Increased margin */
+            width: 100%;
+            max-width: 320px; /* Match trackpad width */
+            display: flex;
+            flex-direction: column;
+            gap: 12px; /* Increased gap */
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        }
+
+        .trackpad-settings-container {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .settings-toggle-btn {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: var(--border-radius-medium);
+            background-color: var(--button-secondary-bg);
+            color: var(--button-secondary-text);
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all var(--transition-speed) ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 8px;
+        }
+
+        .settings-toggle-btn:hover {
+            background-color: var(--button-secondary-hover-bg);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .settings-toggle-btn:active {
+            transform: scale(0.98);
+        }
+
+        .settings-toggle-btn .settings-icon {
+            font-size: 1.1em;
+            margin-right: 8px;
+        }
+
+        .settings-toggle-btn .settings-label {
+            flex: 1;
+            text-align: left;
+        }
+
+        .toggle-arrow {
+            font-size: 0.8em;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-left: 8px;
+        }
+
+        .toggle-arrow.expanded {
+            transform: rotate(180deg);
+        }
+
+        .trackpad-settings.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0;
+            pointer-events: none;
+        }
+
+        .trackpad-settings.expanded {
+            max-height: 300px; /* Adjust based on content */
+            opacity: 1;
+            margin-top: 12px;
+        }
+          .trackpad-setting-row {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            justify-content: space-between; /* Better spacing distribution */
+        }
+        
+        .trackpad-setting-row label {
+            margin-right: 8px; /* Reduced margin */
+            font-size: 0.9em; /* Adjusted font size */
+            width: 100px; /* Slightly reduced width */
+            color: var(--text-color-muted);
+            flex-shrink: 0; /* Prevent label from shrinking */
+        }
+          .trackpad-setting-row input[type="range"] { /* Style range inputs */
+            flex: 1;
+            min-width: 0; /* Allow shrinking below content size */
+            max-width: calc(100% - 140px); /* Leave room for label and value */
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: var(--slider-track-bg);
+            border-radius: var(--border-radius-small);
+            outline: none;
+            transition: background var(--transition-speed) ease;
+            margin: 0 8px; /* Add some horizontal margin */
+        }
+
+        .trackpad-setting-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--slider-thumb-bg);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transition: background var(--transition-speed) ease;
+        }
+
+        .trackpad-setting-row input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: var(--slider-thumb-bg);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none; /* Remove default border in Firefox */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transition: background var(--transition-speed) ease;
+        }
+          .setting-value {
+            margin-left: 15px; /* Increased margin */
+            font-size: 0.9em; /* Adjusted font size */
+            min-width: 20px; /* Reduced width */
+            max-width: 30px; /* Added max width to prevent overflow */
+            text-align: center;
+            color: var(--text-color);
+            background-color: var(--input-bg);
+            padding: 2px 6px; /* Reduced padding */
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--border-color);
+        }
+          /* D-Pad (Arrow Keys) */
+        .d-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3x3 grid */
+            grid-template-rows: repeat(3, 1fr); /* 3x3 grid */
+            gap: 10px; /* Slightly reduced gap for better positioning */
+            justify-items: center;
+            align-items: center;
+            margin: 25px auto; /* Adjusted margin */
+            width: 220px; /* Adjusted size */
+            height: 220px; /* Adjusted size */
+            position: relative; /* Ensure proper positioning */
+        }
+        
+        .direction {
+            width: 60px; /* Slightly smaller for better fit */
+            height: 60px; /* Slightly smaller for better fit */
+            border: none;
+            border-radius: 50%;
+            background-color: var(--button-secondary-bg); /* Secondary style */
+            color: var(--button-secondary-text); /* Secondary style */
+            font-size: 22px; /* Adjusted font size */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+        }
+        
+        .direction:active {
+            background-color: var(--button-secondary-hover-bg); /* Changed to secondary */
+            transform: scale(0.92); /* Enhanced active state */
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Specific D-Pad button placement */
+        #up { grid-area: 1 / 2 / 2 / 3; } /* Top center */
+        #left { grid-area: 2 / 1 / 3 / 2; } /* Middle left */
+        #right { grid-area: 2 / 3 / 3 / 4; } /* Middle right */
+        #down { grid-area: 3 / 2 / 4 / 3; } /* Bottom center */
+        
+        /* Mouse clicks */
+        .click-buttons {
+            display: flex;
+            justify-content: space-around; /* Better distribution */
+            align-items: center;
+            margin: 30px 0; /* Adjusted margin */
+            gap: 15px; /* Added gap */
+        }
+        
+        .click-btn {
+            min-width: 75px; /* Minimum width */
+            height: 55px; /* Adjusted height */
+            padding: 0 15px; /* Horizontal padding */
+            border: none;
+            border-radius: var(--border-radius-medium); /* Updated */
+            background-color: var(--button-primary-bg);
+            color: var(--button-primary-text);
+            font-size: 0.95em; /* Adjusted font size */
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+        }
+          .click-btn:active {
+            background-color: var(--button-primary-hover-bg);
+            transform: scale(0.95); /* Enhanced active state */
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        /* Scroll buttons */
+        .scroll-buttons {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 20px 0;
+            gap: 15px;
+        }
+        
+        .scroll-btn {
+            min-width: 90px;
+            height: 60px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: var(--border-radius-medium);
+            background-color: var(--button-secondary-bg);
+            color: var(--button-secondary-text);
+            font-size: 0.9em;
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all var(--transition-speed) ease;
+            gap: 4px;
+        }
+        
+        .scroll-btn:hover {
+            background-color: var(--button-secondary-hover-bg);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .scroll-btn:active {
+            background-color: var(--button-primary-bg);
+            color: var(--button-primary-text);
+            transform: scale(0.95);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .scroll-btn.scrolling {
+            background-color: var(--button-primary-bg);
+            color: var(--button-primary-text);
+            animation: pulse 0.6s infinite alternate;
+        }
+        
+        .scroll-icon {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .scroll-label {
+            font-size: 0.75em;
+            opacity: 0.8;
+        }
+        
+        /* Keyboard inputs */
+        .keyboard-input {
+            width: 100%;
+            padding: 12px 15px; /* Adjusted padding */
+            margin-bottom: 15px; /* Adjusted margin */
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-small); /* Updated */
+            font-size: 1em; /* Adjusted font size */
+            font-weight: 500;
+            box-sizing: border-box;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+        .keyboard-input:focus {
+            outline: none;
+            border-color: var(--button-primary-bg);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3); /* Focus ring */
+        }
+        
+        .send-btn {
+            padding: 12px 25px; /* Adjusted padding */
+            background-color: var(--button-secondary-bg); /* Changed to secondary */
+            border: none;
+            border-radius: var(--border-radius-small); /* Updated */
+            color: var(--button-secondary-text); /* Changed to secondary */
+            font-size: 1em; /* Adjusted font size */
+            font-weight: 500;
+            cursor: pointer;
+            display: block;
+            width: 100%; /* Full width */
+            max-width: 200px; /* Max width */
+            margin: 0 auto;
+            transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+        }
+        
+        .send-btn:active {
+            background-color: var(--button-secondary-hover-bg); /* Changed to secondary */
+            transform: scale(0.98);
+        }
+        
+        /* Quick keys & Combo keys */
+        .keys-grid { /* New class for both key grids */
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); /* Responsive grid */
+            gap: 10px;
+        }
+        
+        .key, .combo-key {
+            padding: 15px 10px; /* Adjusted padding */
+            background-color: var(--button-tertiary-bg);
+            border: none;
+            border-radius: var(--border-radius-small); /* Updated */
+            color: var(--button-tertiary-text);
+            font-size: 0.85em; /* Adjusted font size */
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+            line-height: 1.2; /* Ensure text fits */
+            min-height: 50px; /* Ensure consistent height */
+            display: flex; /* For centering text */
+            align-items: center; /* For centering text */
+            justify-content: center; /* For centering text */
+        }
+        
+        .key:active, .combo-key:active {
+            background-color: var(--button-tertiary-hover-bg);
+            transform: scale(0.95); /* Enhanced active state */
+        }
+        
+        .status {
+            text-align: center;
+            color: var(--status-color);
+            font-style: italic;
+            margin-top: 25px; /* Adjusted margin */
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+
+        /* Utility class for hiding elements (for JS control) */
+        .hidden {
+            display: none !important;
+        }        /* Responsive design for mobile devices */
+        @media (max-width: 480px) {
+            .tab-button {
+                padding: 12px 8px;
+                min-height: 60px;
+            }
+            
+            .tab-icon {
+                font-size: 1.2em;
+            }
+              .tab-label {
+                font-size: 0.75em;
+            }
+            
+            .container {
+                padding-bottom: 70px; /* Reduced padding for mobile */
+            }
+        }
+        
+        /* Smooth hover effects */
+        @media (hover: hover) {            .tab-button:hover {
+                background: rgba(52, 152, 219, 0.1);
+                transform: translateY(-1px);
+            }
+        }
+    </style>
+</head>
+<body>    <!-- Modern Tab Navigation -->
+    <div class="tab-navigation">
+        <div class="tab-container">            <button class="tab-button" data-section="0">
+                <div class="tab-icon">ℹ️</div>
+                <div class="tab-label">Info</div>
+            </button>
+            <button class="tab-button active" data-section="1">
+                <div class="tab-icon">🖱️</div>
+                <div class="tab-label">Control</div>
+            </button>
+            <button class="tab-button" data-section="2">
+                <div class="tab-icon">⚙️</div>
+                <div class="tab-label">Advanced</div>
+            </button>
+            <div class="tab-indicator" id="tab-indicator"></div>
+        </div>    </div>
+    
+    <div class="container">
+        <div class="swipe-container" id="swipe-container">            <!-- Left section - Settings & Info -->
+            <div class="swipe-section left">
+                <h1>Settings & Info</h1>
+                
+                <div class="theme-toggle">
+                    <span class="theme-label">Dark Mode</span>
+                    <label class="theme-switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                  <div class="section">
+                    <h2>App Information</h2>
+                    <p>RemoteReach allows you to control your computer remotely using touch gestures.</p>
+                    <p><strong>Features:</strong></p><ul>
+                        <li>Trackpad & D-Pad mouse control</li>
+                        <li>Text input and quick keys</li>
+                        <li>Keyboard combinations</li>
+                        <li>Customizable sensitivity settings</li>
+                    </ul>
+                </div>
+                
+                <div class="section">
+                    <h2>Connection Status</h2>
+                    <div class="status" id="status-left">Connecting...</div>
+                    <p>Ensure your device and computer are connected to the same network.</p>
+                </div>
+            </div>
+              <!-- Center section - Main Controls -->
+            <div class="swipe-section center">
+                <h1>Main Controls</h1>
+                
+                <div class="theme-toggle">
+                    <span class="theme-label">Dark Mode</span>
+                    <label class="theme-switch">
+                        <input type="checkbox" id="theme-toggle-center">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="status" id="status">Connecting...</div>
+                
+                <div class="section">
+                    <h2>Mouse Control</h2>
+                    
+                    <div class="control-toggle">
+                        <div class="toggle-btn-group">
+                            <div class="toggle-btn-slider" id="toggle-btn-slider"></div>
+                            <button class="toggle-btn active" id="trackpad-btn" data-control="trackpad">Trackpad</button>
+                            <button class="toggle-btn" id="dpad-btn" data-control="dpad">D-Pad</button>
+                        </div>
+                    </div>
+                    
+                    <div id="trackpad-control" class="control-method">
+                        <div class="trackpad-container">
+                            <div class="trackpad" id="trackpad">
+                                <div class="trackpad-cursor" id="trackpad-cursor"></div>
+                            </div>                            <div class="trackpad-settings-container">
+                                <button class="settings-toggle-btn" id="settings-toggle">
+                                    <span class="settings-icon">⚙️</span>
+                                    <span class="settings-label">Settings</span>
+                                    <span class="toggle-arrow" id="toggle-arrow">▼</span>
+                                </button>
+                                <div class="trackpad-settings" id="trackpad-settings">
+                                    <div class="trackpad-setting-row">
+                                        <label for="sensitivity">Sensitivity:</label>
+                                        <input type="range" id="sensitivity" min="1" max="10" value="5">
+                                        <span class="setting-value" id="sensitivity-value">5</span>
+                                    </div>
+                                    <div class="trackpad-setting-row">
+                                        <label for="acceleration">Acceleration:</label>
+                                        <input type="range" id="acceleration" min="0" max="10" value="5">
+                                        <span class="setting-value" id="acceleration-value">5</span>
+                                    </div>
+                                    <div class="trackpad-setting-row">
+                                        <label for="smoothing">Smoothing:</label>
+                                        <input type="range" id="smoothing" min="1" max="10" value="5">
+                                        <span class="setting-value" id="smoothing-value">5</span>
+                                    </div>
+                                    <div class="trackpad-setting-row">
+                                        <label for="deadzone">Deadzone:</label>
+                                        <input type="range" id="deadzone" min="0" max="10" value="2">
+                                        <span class="setting-value" id="deadzone-value">2</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="dpad-control" class="control-method hidden">
+                        <div class="d-pad">
+                            <div></div>
+                            <button class="direction" id="up">▲</button>
+                            <div></div>
+                            <button class="direction" id="left">◀</button>
+                            <div></div>
+                            <button class="direction" id="right">▶</button>
+                            <div></div>
+                            <button class="direction" id="down">▼</button>
+                            <div></div>
+                        </div>
+                    </div>
+                      <div class="click-buttons">
+                        <button class="click-btn" id="left-click">Left</button>
+                        <button class="click-btn" id="double-click">Double</button>
+                        <button class="click-btn" id="right-click">Right</button>
+                    </div>
+                    
+                    <div class="scroll-buttons">
+                        <button class="scroll-btn" id="scroll-up" title="Scroll Computer Screen Up">
+                            <span class="scroll-icon">▲</span>
+                            <span class="scroll-label">Scroll Up</span>
+                        </button>
+                        <button class="scroll-btn" id="scroll-down" title="Scroll Computer Screen Down">
+                            <span class="scroll-icon">▼</span>
+                            <span class="scroll-label">Scroll Down</span>
+                        </button>
+                    </div>
+                </div>
+                  <div class="section">
+                    <h2>Text Input</h2>
+                    <input type="text" class="keyboard-input" id="text-input" placeholder="Type text here...">
+                    <button class="send-btn" id="send-text">Send Text</button>
+                </div>
+                
+                <div class="section">
+                    <h2>Quick Keys</h2>
+                    <div class="keys-grid">
+                        <button class="key" data-key="enter">Enter</button>
+                        <button class="key" data-key="space">Space</button>
+                        <button class="key" data-key="backspace">Backspace</button>
+                        <button class="key" data-key="tab">Tab</button>
+                        <button class="key" data-key="escape">Esc</button>
+                        <button class="key" data-key="up">↑</button>
+                        <button class="key" data-key="down">↓</button>
+                        <button class="key" data-key="left">←</button>
+                        <button class="key" data-key="right">→</button>
+                        <button class="key" data-key="volumeup">Vol+</button>
+                        <button class="key" data-key="volumedown">Vol-</button>
+                        <button class="key" data-key="volumemute">Mute</button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Keyboard Combinations</h2>
+                    <div class="keys-grid">
+                        <button class="combo-key" data-combo="alt+tab">Alt+Tab</button>
+                        <button class="combo-key" data-combo="win+tab">Win+Tab</button>
+                        <button class="combo-key" data-combo="win+d">Win+D</button>
+                        <button class="combo-key" data-combo="win+l">Win+L</button>
+                        <button class="combo-key" data-combo="alt+f4">Alt+F4</button>
+                        <button class="combo-key" data-combo="ctrl+c">Ctrl+C</button>
+                        <button class="combo-key" data-combo="ctrl+v">Ctrl+V</button>
+                        <button class="combo-key" data-combo="ctrl+z">Ctrl+Z</button>
+                        <button class="combo-key" data-combo="ctrl+a">Ctrl+A</button>
+                        <button class="combo-key" data-combo="ctrl+s">Ctrl+S</button>
+                    </div>
+                </div>
+  
+            </div>
+              <!-- Right section - Advanced Controls -->
+            <div class="swipe-section right">
+                <h1>Advanced Controls</h1>
+                
+                <div class="theme-toggle">
+                    <span class="theme-label">Dark Mode</span>
+                    <label class="theme-switch">
+                        <input type="checkbox" id="theme-toggle-right">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="section">
+                    <h2>System Controls</h2>
+                    <div class="keys-grid">
+                        <button class="key" data-key="fn+f1">F1</button>
+                        <button class="key" data-key="fn+f2">F2</button>
+                        <button class="key" data-key="fn+f3">F3</button>
+                        <button class="key" data-key="fn+f4">F4</button>
+                        <button class="key" data-key="fn+f5">F5</button>
+                        <button class="key" data-key="fn+f6">F6</button>
+                        <button class="key" data-key="fn+f7">F7</button>
+                        <button class="key" data-key="fn+f8">F8</button>
+                        <button class="key" data-key="fn+f9">F9</button>
+                        <button class="key" data-key="fn+f10">F10</button>
+                        <button class="key" data-key="fn+f11">F11</button>
+                        <button class="key" data-key="fn+f12">F12</button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Special Keys</h2>
+                    <div class="keys-grid">
+                        <button class="key" data-key="home">Home</button>
+                        <button class="key" data-key="end">End</button>
+                        <button class="key" data-key="pageup">Page Up</button>
+                        <button class="key" data-key="pagedown">Page Down</button>
+                        <button class="key" data-key="insert">Insert</button>
+                        <button class="key" data-key="delete">Delete</button>
+                        <button class="key" data-key="printscreen">PrtSc</button>
+                        <button class="key" data-key="scrolllock">Scroll Lock</button>
+                        <button class="key" data-key="pause">Pause</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Socket.IO client script -->
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const statusElement = document.getElementById('status');
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeToggleCenter = document.getElementById('theme-toggle-center');
+            const themeToggleRight = document.getElementById('theme-toggle-right');
+            const htmlElement = document.documentElement;            const swipeContainer = document.getElementById('swipe-container');
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabIndicator = document.getElementById('tab-indicator');
+            const scrollUpBtn = document.getElementById('scroll-up');
+            const scrollDownBtn = document.getElementById('scroll-down');            let currentSection = 1; // Start with center section (mouse control)
+            let scrollInterval = null;
+            let scrollSpeed = 300; // Initial scroll speed (increased from 150)
+            let scrollAcceleration = 0;
+            let maxScrollSpeed = 1000; // Maximum scroll speed (increased from 500)
+            
+            // Tab navigation functions
+            function updateSectionDisplay() {
+                const translateX = -currentSection * 33.333; // Each section is 33.333% wide
+                swipeContainer.style.transform = `translateX(${translateX}%)`;
+                
+                // Update tab buttons
+                tabButtons.forEach((btn, index) => {
+                    btn.classList.toggle('active', index === currentSection);
+                });
+                
+                // Update tab indicator position
+                tabIndicator.style.transform = `translateX(${currentSection * 100}%)`;
+                
+                // Save current section
+                localStorage.setItem('currentSection', currentSection);
+            }
+            
+            function goToSection(sectionIndex) {
+                if (sectionIndex >= 0 && sectionIndex < 3) {
+                    currentSection = sectionIndex;
+                    updateSectionDisplay();
+                }
+            }
+              // Computer scroll functionality
+            function scrollComputer(direction, accelerated = false) {
+                if (!socket || !socket.connected) {
+                    console.log('Not connected to server');
+                    return;
+                }
+                
+                // Calculate dynamic scroll amount with acceleration
+                let scrollAmount = accelerated ? 
+                    Math.min(scrollSpeed + scrollAcceleration, maxScrollSpeed) : 
+                    scrollSpeed;
+                
+                // Send scroll command to computer
+                if (direction === 'up') {
+                    socket.emit('scroll', { direction: 'up', amount: scrollAmount });
+                } else if (direction === 'down') {
+                    socket.emit('scroll', { direction: 'down', amount: scrollAmount });
+                }                // Increase acceleration for continuous scrolling
+                if (accelerated) {
+                    scrollAcceleration = Math.min(scrollAcceleration + 30, maxScrollSpeed - scrollSpeed); // Increased from 15 to 30
+                }
+            }
+            
+            function startContinuousScroll(direction) {
+                // Stop any existing scroll
+                stopContinuousScroll();
+                
+                // Reset acceleration
+                scrollAcceleration = 0;
+                
+                // Immediate scroll
+                scrollComputer(direction);                // Set up continuous scrolling with acceleration
+                scrollInterval = setInterval(() => {
+                    scrollComputer(direction, true);
+                }, 25); // Scroll every 25ms when held (reduced from 50ms for even faster scrolling)
+            }
+            
+            function stopContinuousScroll() {
+                if (scrollInterval) {
+                    clearInterval(scrollInterval);
+                    scrollInterval = null;
+                }
+                
+                // Reset acceleration
+                scrollAcceleration = 0;
+                
+                // Remove scrolling class from buttons
+                scrollUpBtn.classList.remove('scrolling');
+                scrollDownBtn.classList.remove('scrolling');
+            }
+            
+            // Load saved section
+            const savedSection = localStorage.getItem('currentSection');
+            if (savedSection !== null) {
+                currentSection = parseInt(savedSection);
+            }
+            updateSectionDisplay();
+            
+            // Tab button click handlers
+            tabButtons.forEach((button, index) => {
+                button.addEventListener('click', () => {
+                    goToSection(index);
+                });
+            });
+            
+            // Scroll button handlers
+              // Scroll Up Button
+            scrollUpBtn.addEventListener('mousedown', () => {
+                scrollUpBtn.classList.add('scrolling');
+                startContinuousScroll('up');
+            });
+            
+            scrollUpBtn.addEventListener('mouseup', stopContinuousScroll);
+            scrollUpBtn.addEventListener('mouseleave', stopContinuousScroll);
+            
+            // Touch events for scroll up
+            scrollUpBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                scrollUpBtn.classList.add('scrolling');
+                startContinuousScroll('up');
+            });
+            
+            scrollUpBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                stopContinuousScroll();
+            });
+            
+            // Scroll Down Button
+            scrollDownBtn.addEventListener('mousedown', () => {
+                scrollDownBtn.classList.add('scrolling');
+                startContinuousScroll('down');
+            });
+            
+            scrollDownBtn.addEventListener('mouseup', stopContinuousScroll);
+            scrollDownBtn.addEventListener('mouseleave', stopContinuousScroll);
+            
+            // Touch events for scroll down
+            scrollDownBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                scrollDownBtn.classList.add('scrolling');
+                startContinuousScroll('down');
+            });
+            
+            scrollDownBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                stopContinuousScroll();
+            });            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    goToSection(currentSection - 1);
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    goToSection(currentSection + 1);
+                } else if (e.key >= '1' && e.key <= '3') {
+                    // Quick section access with number keys
+                    e.preventDefault();
+                    goToSection(parseInt(e.key) - 1);
+                } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+                    // Scroll computer screen up
+                    e.preventDefault();
+                    scrollComputer('up');
+                } else if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+                    // Scroll computer screen down
+                    e.preventDefault();
+                    scrollComputer('down');
+                } else if (e.key === 'Home') {
+                    // Send Home key to computer
+                    e.preventDefault();
+                    if (socket && socket.connected) {
+                        socket.emit('key', { key: 'home' });
+                    }
+                } else if (e.key === 'End') {
+                    // Send End key to computer
+                    e.preventDefault();
+                    if (socket && socket.connected) {
+                        socket.emit('key', { key: 'end' });
+                    }
+                }
+            });
+            
+            // Control method toggle
+            const trackpadBtn = document.getElementById('trackpad-btn');
+            const dpadBtn = document.getElementById('dpad-btn');
+            const toggleBtnSlider = document.getElementById('toggle-btn-slider');
+            const trackpadControl = document.getElementById('trackpad-control');
+            const dpadControl = document.getElementById('dpad-control');
+            
+            // Initialize control method from saved preference
+            const savedControlMethod = localStorage.getItem('controlMethod') || 'trackpad';
+            if (savedControlMethod === 'dpad') {
+                setControlMethod('dpad');
+            } else {
+                setControlMethod('trackpad');
+            }
+            
+            function setControlMethod(method) {
+                const slider = document.getElementById('toggle-btn-slider');
+                if (method === 'trackpad') {
+                    trackpadControl.classList.remove('hidden');
+                    dpadControl.classList.add('hidden');
+                    trackpadBtn.classList.add('active');
+                    dpadBtn.classList.remove('active');
+                    slider.style.transform = 'translateX(0)';
+                    localStorage.setItem('controlMethod', 'trackpad');
+                } else { // dpad
+                    trackpadControl.classList.add('hidden');
+                    dpadControl.classList.remove('hidden');
+                    trackpadBtn.classList.remove('active');
+                    dpadBtn.classList.add('active');
+                    slider.style.transform = `translateX(${dpadBtn.offsetWidth}px)`;
+                    localStorage.setItem('controlMethod', 'dpad');
+                }
+            }
+            
+            trackpadBtn.addEventListener('click', () => setControlMethod('trackpad'));
+            dpadBtn.addEventListener('click', () => setControlMethod('dpad'));
+
+            // Initial call to setControlMethod based on localStorage or default
+            setControlMethod(localStorage.getItem('controlMethod') || 'trackpad');
+            
+            // Get server address from current URL
+            const serverUrl = window.location.origin;
+            const socket = io(serverUrl);
+              // Connection status updates
+            const statusLeftElement = document.getElementById('status-left');
+            
+            function updateStatus(text, color) {
+                statusElement.textContent = text;
+                statusElement.style.color = color;
+                if (statusLeftElement) {
+                    statusLeftElement.textContent = text;
+                    statusLeftElement.style.color = color;
+                }
+            }
+            
+            socket.on('connect', () => {
+                updateStatus('Connected to server', '#4CAF50');
+            });
+            
+            socket.on('disconnect', () => {
+                updateStatus('Disconnected from server', '#F44336');
+            });
+            
+            socket.on('connect_error', () => {
+                updateStatus('Connection error', '#F44336');
+            });            // Enhanced Trackpad functionality with smoothing and prediction
+            const trackpad = document.getElementById('trackpad');
+            const trackpadCursor = document.getElementById('trackpad-cursor');
+            const sensitivitySlider = document.getElementById('sensitivity');
+            const sensitivityValue = document.getElementById('sensitivity-value');
+            const accelerationSlider = document.getElementById('acceleration');
+            const accelerationValue = document.getElementById('acceleration-value');
+            const smoothingSlider = document.getElementById('smoothing');
+            const smoothingValue = document.getElementById('smoothing-value');
+            const deadzoneSlider = document.getElementById('deadzone');
+            const deadzoneValue = document.getElementById('deadzone-value');
+
+            // Settings toggle elements
+            const settingsToggleBtn = document.getElementById('settings-toggle');
+            const trackpadSettings = document.getElementById('trackpad-settings');
+            const toggleArrow = document.getElementById('toggle-arrow');
+
+            // Settings toggle functionality
+            let settingsExpanded = localStorage.getItem('trackpadSettingsExpanded') === 'true';
+            
+            function updateSettingsDisplay() {
+                if (settingsExpanded) {
+                    trackpadSettings.classList.remove('collapsed');
+                    trackpadSettings.classList.add('expanded');
+                    toggleArrow.classList.add('expanded');
+                } else {
+                    trackpadSettings.classList.remove('expanded');
+                    trackpadSettings.classList.add('collapsed');
+                    toggleArrow.classList.remove('expanded');
+                }
+                localStorage.setItem('trackpadSettingsExpanded', settingsExpanded);
+            }
+
+            // Initialize settings display
+            updateSettingsDisplay();
+
+            settingsToggleBtn.addEventListener('click', () => {
+                settingsExpanded = !settingsExpanded;
+                updateSettingsDisplay();
+            });
+            
+            // Settings
+            let sensitivity = parseInt(sensitivitySlider.value);
+            let acceleration = parseInt(accelerationSlider.value);
+            let smoothing = parseInt(smoothingSlider.value);
+            let deadzone = parseInt(deadzoneSlider.value);
+            
+            // Tracking state
+            let isTrackpadActive = false;
+            let lastX = 0;
+            let lastY = 0;
+            let moveInterval = null;
+            
+            // Smoothing buffer for move history
+            const positionHistory = [];
+            const HISTORY_SIZE = 5; // Number of positions to keep for smoothing
+            
+            // Load settings from localStorage if available
+            function loadTrackpadSettings() {
+                const savedSensitivity = localStorage.getItem('trackpadSensitivity');
+                const savedAcceleration = localStorage.getItem('trackpadAcceleration');
+                const savedSmoothing = localStorage.getItem('trackpadSmoothing');
+                const savedDeadzone = localStorage.getItem('trackpadDeadzone');
+                
+                if (savedSensitivity) {
+                    sensitivity = parseInt(savedSensitivity);
+                    sensitivitySlider.value = sensitivity;
+                    sensitivityValue.textContent = sensitivity;
+                }
+                
+                if (savedAcceleration) {
+                    acceleration = parseInt(savedAcceleration);
+                    accelerationSlider.value = acceleration;
+                    accelerationValue.textContent = acceleration;
+                }
+                
+                if (savedSmoothing) {
+                    smoothing = parseInt(savedSmoothing);
+                    smoothingSlider.value = smoothing;
+                    smoothingValue.textContent = smoothing;
+                }
+                
+                if (savedDeadzone) {
+                    deadzone = parseInt(savedDeadzone);
+                    deadzoneSlider.value = deadzone;
+                    deadzoneValue.textContent = deadzone;
+                }
+            }
+            
+            // Save settings to localStorage
+            function saveTrackpadSetting(setting, value) {
+                localStorage.setItem(setting, value);
+            }
+            
+            // Initialize settings
+            loadTrackpadSettings();
+            
+            // Update settings displays and save values
+            sensitivitySlider.addEventListener('input', () => {
+                sensitivity = parseInt(sensitivitySlider.value);
+                sensitivityValue.textContent = sensitivity;
+                saveTrackpadSetting('trackpadSensitivity', sensitivity);
+            });
+            
+            accelerationSlider.addEventListener('input', () => {
+                acceleration = parseInt(accelerationSlider.value);
+                accelerationValue.textContent = acceleration;
+                saveTrackpadSetting('trackpadAcceleration', acceleration);
+            });
+            
+            smoothingSlider.addEventListener('input', () => {
+                smoothing = parseInt(smoothingSlider.value);
+                smoothingValue.textContent = smoothing;
+                saveTrackpadSetting('trackpadSmoothing', smoothing);
+            });
+            
+            deadzoneSlider.addEventListener('input', () => {
+                deadzone = parseInt(deadzoneSlider.value);
+                deadzoneValue.textContent = deadzone;
+                saveTrackpadSetting('trackpadDeadzone', deadzone);
+            });
+              // Apply smoothing to position data
+            function getSmoothedPosition(newX, newY) {
+                // Add new position to history
+                positionHistory.push({ x: newX, y: newY });
+                
+                // Keep history at fixed size
+                if (positionHistory.length > HISTORY_SIZE) {
+                    positionHistory.shift();
+                }
+                
+                // Calculate weighted average based on smoothing level
+                const smoothingFactor = smoothing / 10; // 0.1 to 1.0
+                
+                if (positionHistory.length <= 1 || smoothingFactor <= 0.1) {
+                    return { x: newX, y: newY }; // No smoothing if history is too short or smoothing is low
+                }
+                
+                // Calculate smoothed position with more weight to recent positions
+                let totalWeightX = 0;
+                let totalWeightY = 0;
+                let totalWeight = 0;
+                
+                for (let i = 0; i < positionHistory.length; i++) {
+                    // Exponential weighting - newer positions have higher weight
+                    const weight = Math.pow(i + 1, 2); 
+                    totalWeightX += positionHistory[i].x * weight;
+                    totalWeightY += positionHistory[i].y * weight;
+                    totalWeight += weight;
+                }
+                
+                // Return smoothed values
+                return {
+                    x: totalWeightX / totalWeight,
+                    y: totalWeightY / totalWeight
+                };
+            }
+            
+            // Predict next position based on movement trend
+            function predictNextPosition(x, y) {
+                if (positionHistory.length < 2) {
+                    return { x, y }; // Not enough history to predict
+                }
+                
+                // Calculate velocity from last positions
+                const latest = positionHistory[positionHistory.length - 1];
+                const previous = positionHistory[positionHistory.length - 2];
+                
+                // Calculate velocity vector
+                const velocityX = latest.x - previous.x;
+                const velocityY = latest.y - previous.y;
+                
+                // Predict next position with prediction strength based on smoothing level
+                const predictionStrength = smoothing / 20; // 0.05 to 0.5
+                const predictedX = x + velocityX * predictionStrength;
+                const predictedY = y + velocityY * predictionStrength;
+                
+                return { x: predictedX, y: predictedY };
+            }
+            
+            // Enhanced trackpad touch/mouse events
+            const handleTrackpadStart = (e) => {
+                isTrackpadActive = true;
+                trackpadCursor.style.opacity = '1';
+                trackpad.style.cursor = 'grabbing';
+                  // Get position
+                const touch = e.type.includes('touch') ? e.touches[0] : e;
+                const rect = trackpad.getBoundingClientRect();
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                
+                // Clear position history
+                positionHistory.length = 0;
+                
+                // Define larger margins to prevent cursor from getting stuck at edges
+                const safeMargin = 20;
+                
+                // Keep within bounds with safety margin
+                const boundedX = Math.max(safeMargin, Math.min(trackpad.clientWidth - safeMargin, x));
+                const boundedY = Math.max(safeMargin, Math.min(trackpad.clientHeight - safeMargin, y));
+                
+                // Update cursor position
+                trackpadCursor.style.left = `${boundedX}px`;
+                trackpadCursor.style.top = `${boundedY}px`;
+                
+                lastX = boundedX;
+                lastY = boundedY;
+                  // Start continuous movement
+                clearInterval(moveInterval);
+                moveInterval = setInterval(() => {
+                    // Only move if active and we have valid last position
+                    if (isTrackpadActive && lastX !== null && lastY !== null) {
+                        const centerX = trackpad.clientWidth / 2;
+                        const centerY = trackpad.clientHeight / 2;
+                        
+                        // Apply smoothing to position
+                        const smoothed = getSmoothedPosition(lastX, lastY);
+                        
+                        // Calculate relative movement from center
+                        let deltaX = smoothed.x - centerX;
+                        let deltaY = smoothed.y - centerY;
+                        
+                        // Apply deadzone (minimum movement threshold)
+                        const deadzoneThreshold = 5 + deadzone * 2;
+                        
+                        // Calculate distance from edge to apply "bounce effect" if needed
+                        const edgeMargin = 15;
+                        const distanceFromLeftEdge = smoothed.x;
+                        const distanceFromRightEdge = trackpad.clientWidth - smoothed.x;
+                        const distanceFromTopEdge = smoothed.y;
+                        const distanceFromBottomEdge = trackpad.clientHeight - smoothed.y;
+                        
+                        // Initialize bounce factors (default = no bounce)
+                        let bounceFactorX = 1;
+                        let bounceFactorY = 1;
+                          // Apply improved bounce effect if too close to edges
+                        if (distanceFromLeftEdge < edgeMargin && deltaX < 0) {
+                            bounceFactorX = Math.max(0.2, distanceFromLeftEdge / edgeMargin);
+                        } else if (distanceFromRightEdge < edgeMargin && deltaX > 0) {
+                            bounceFactorX = Math.max(0.2, distanceFromRightEdge / edgeMargin);
+                        }
+                        
+                        if (distanceFromTopEdge < edgeMargin && deltaY < 0) {
+                            bounceFactorY = Math.max(0.2, distanceFromTopEdge / edgeMargin);
+                        } else if (distanceFromBottomEdge < edgeMargin && deltaY > 0) {
+                            bounceFactorY = Math.max(0.2, distanceFromBottomEdge / edgeMargin);
+                        }
+                        
+                        // If very close to edge (within 5px), apply a small push in opposite direction
+                        const veryCloseMargin = 5;
+                        if (distanceFromLeftEdge < veryCloseMargin && Math.abs(deltaX) < 5) {
+                            deltaX = 1;
+                        } else if (distanceFromRightEdge < veryCloseMargin && Math.abs(deltaX) < 5) {
+                            deltaX = -1;
+                        }
+                        
+                        if (distanceFromTopEdge < veryCloseMargin && Math.abs(deltaY) < 5) {
+                            deltaY = 1;
+                        } else if (distanceFromBottomEdge < veryCloseMargin && Math.abs(deltaY) < 5) {
+                            deltaY = -1;
+                        }
+                          // Apply bounce factors to deltas
+                        const adjustedDeltaX = deltaX * bounceFactorX;
+                        const adjustedDeltaY = deltaY * bounceFactorY;
+                        
+                        // Only move if we're beyond the deadzone threshold
+                        if (Math.abs(adjustedDeltaX) > deadzoneThreshold || Math.abs(adjustedDeltaY) > deadzoneThreshold) {
+                            // Predicted position for better response
+                            const predicted = predictNextPosition(smoothed.x, smoothed.y);
+                            
+                            // Prevent edge sticking by ensuring predicted position is within safe bounds
+                            const safeMargin = 20;
+                            const isPredictionValid = 
+                                predicted.x >= safeMargin && 
+                                predicted.x <= trackpad.clientWidth - safeMargin && 
+                                predicted.y >= safeMargin && 
+                                predicted.y <= trackpad.clientHeight - safeMargin;
+                              // Calculate movement with added prediction and bounce effect
+                            const predictedDeltaX = (predicted.x - centerX) * bounceFactorX;
+                            const predictedDeltaY = (predicted.y - centerY) * bounceFactorY;
+                            
+                            // Use prediction only if valid, otherwise use smoothed position
+                            const finalDeltaX = isPredictionValid ? predictedDeltaX : adjustedDeltaX;
+                            const finalDeltaY = isPredictionValid ? predictedDeltaY : adjustedDeltaY;
+                            
+                            // Send movement with all parameters
+                            const baseSpeed = 0.2;
+                            const moveData = {
+                                x: Math.round(finalDeltaX * baseSpeed),  
+                                y: Math.round(finalDeltaY * baseSpeed),
+                                sensitivity: sensitivity,
+                                acceleration: acceleration,
+                                smoothing: smoothing,
+                                deadzone: deadzone
+                            };
+                            
+                            socket.emit('mouse_move_relative', moveData);
+                        }
+                    }
+                }, 16); // ~60 fps update rate for smoother movement
+            };
+            
+            const handleTrackpadMove = (e) => {
+                if (!isTrackpadActive) return;
+                
+                // Prevent default behavior (scrolling, etc.)
+                e.preventDefault();
+                  // Get position
+                const touch = e.type.includes('touch') ? e.touches[0] : e;
+                const rect = trackpad.getBoundingClientRect();
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                  // Define larger margins to prevent cursor from getting stuck at edges
+                const safeMargin = 20;
+                
+                // Keep within bounds with safety margin
+                const boundedX = Math.max(safeMargin, Math.min(trackpad.clientWidth - safeMargin, x));
+                const boundedY = Math.max(safeMargin, Math.min(trackpad.clientHeight - safeMargin, y));
+                
+                // Update cursor position with subtle animation for smoother visual feedback
+                requestAnimationFrame(() => {
+                    trackpadCursor.style.left = `${boundedX}px`;
+                    trackpadCursor.style.top = `${boundedY}px`;
+                });
+                
+                // Store last position for interval movement
+                lastX = boundedX;
+                lastY = boundedY;
+            };
+            
+            const handleTrackpadEnd = () => {
+                isTrackpadActive = false;
+                trackpadCursor.style.opacity = '0';
+                trackpad.style.cursor = 'grab';
+                
+                // Clear position history
+                positionHistory.length = 0;
+                
+                // Stop continuous movement
+                clearInterval(moveInterval);
+                moveInterval = null;
+            };
+              // Add mouse/touch events for trackpad
+            trackpad.addEventListener('mousedown', handleTrackpadStart);
+            document.addEventListener('mousemove', handleTrackpadMove);
+            document.addEventListener('mouseup', handleTrackpadEnd);
+            
+            trackpad.addEventListener('touchstart', (e) => { e.preventDefault(); handleTrackpadStart(e); }, { passive: false });
+            trackpad.addEventListener('touchmove', (e) => { e.preventDefault(); handleTrackpadMove(e); }, { passive: false });
+            trackpad.addEventListener('touchend', handleTrackpadEnd);
+            trackpad.addEventListener('touchcancel', handleTrackpadEnd);
+              // D-Pad (arrow keys) functionality
+            ['up', 'down', 'left', 'right'].forEach(direction => {                const button = document.getElementById(direction);
+                let directionInterval = null;
+                const moveSpeed = 50; // ms between movements (reduced from 100ms for faster movement)
+                
+                // Start continuous movement
+                const startContinuousMovement = () => {
+                    // Clear any existing interval first
+                    if (directionInterval) {
+                        clearInterval(directionInterval);
+                    }
+                    
+                    // Send initial movement immediately
+                    socket.emit('mouse_move', direction);
+                    
+                    // Set up interval for continuous movement
+                    directionInterval = setInterval(() => {
+                        socket.emit('mouse_move', direction);
+                    }, moveSpeed);
+                };
+                
+                // Stop continuous movement
+                const stopContinuousMovement = () => {
+                    if (directionInterval) {
+                        clearInterval(directionInterval);
+                        directionInterval = null;
+                    }
+                };
+                
+                // Mouse events
+                button.addEventListener('mousedown', startContinuousMovement);
+                button.addEventListener('mouseup', stopContinuousMovement);
+                button.addEventListener('mouseleave', stopContinuousMovement);
+                
+                // Touch events
+                button.addEventListener('touchstart', function(e) {
+                    e.preventDefault(); // Prevent default touch behavior
+                    startContinuousMovement();
+                });
+                button.addEventListener('touchend', stopContinuousMovement);
+                button.addEventListener('touchcancel', stopContinuousMovement);
+            });
+            
+            // Mouse clicks
+            document.getElementById('left-click').addEventListener('click', () => {
+                socket.emit('mouse_click', 'left');
+            });
+            
+            document.getElementById('right-click').addEventListener('click', () => {
+                socket.emit('mouse_click', 'right');
+            });
+            
+            document.getElementById('double-click').addEventListener('click', () => {
+                socket.emit('mouse_click', 'double');
+            });
+            
+            // Handle text input
+            document.getElementById('send-text').addEventListener('click', () => {
+                const textInput = document.getElementById('text-input');
+                if (textInput.value) {
+                    socket.emit('text_input', textInput.value);
+                    textInput.value = '';
+                }
+            });
+            
+            // Handle Enter key in text input
+            document.getElementById('text-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    document.getElementById('send-text').click();
+                }
+            });
+            
+            // Quick keys
+            document.querySelectorAll('.key').forEach(button => {
+                button.addEventListener('click', function() {
+                    const key = this.getAttribute('data-key');
+                    socket.emit('key_press', { key: key });
+                });
+            });
+            
+            // Combo keys
+            document.querySelectorAll('.combo-key').forEach(button => {
+                button.addEventListener('click', function() {
+                    const combo = this.getAttribute('data-combo');
+                    socket.emit('key_press', { key: combo });
+                });
+            });
+            
+            // Prevent zooming on double-tap
+            document.addEventListener('dblclick', function(e) {
+                e.preventDefault();
+            });
+            
+            // Theme initialization - check for saved preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                htmlElement.setAttribute('data-theme', savedTheme);
+                const isDark = (savedTheme === 'dark');
+                themeToggle.checked = isDark;
+                themeToggleCenter.checked = isDark;
+                themeToggleRight.checked = isDark;
+            } else {
+                // Check for system preference
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (prefersDark) {
+                    htmlElement.setAttribute('data-theme', 'dark');
+                    themeToggle.checked = true;
+                    themeToggleCenter.checked = true;
+                    themeToggleRight.checked = true;
+                    localStorage.setItem('theme', 'dark');
+                }
+            }
+            
+            // Sync all theme toggles
+            function syncThemeToggles(checked) {
+                themeToggle.checked = checked;
+                themeToggleCenter.checked = checked;
+                themeToggleRight.checked = checked;
+                
+                if (checked) {
+                    htmlElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    htmlElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+            
+            // Theme toggle handlers
+            themeToggle.addEventListener('change', () => syncThemeToggles(themeToggle.checked));
+            themeToggleCenter.addEventListener('change', () => syncThemeToggles(themeToggleCenter.checked));
+            themeToggleRight.addEventListener('change', () => syncThemeToggles(themeToggleRight.checked));
+            
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', () => {
+                stopContinuousScroll();
+            });
+            
+            // Also stop scrolling if user switches tabs/sections
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    stopContinuousScroll();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
