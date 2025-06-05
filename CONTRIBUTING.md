@@ -26,30 +26,31 @@ Thank you for your interest in contributing to RemoteReach! This document provid
 #### Setting Up Development Environment
 
 1. **Fork the repository** on GitHub
-2. **Clone your fork** locally:   ```bash
+2. **Clone your fork** locally:   
+   ```powershell
    git clone https://github.com/your-username/remotereach.git
    cd remotereach
    ```
 3. **Create a virtual environment**:
-   ```bash
+   ```powershell
    python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   venv\Scripts\activate
    ```
 4. **Install dependencies**:
-   ```bash
+   ```powershell
    pip install -r requirements.txt
    ```
 
 #### Making Changes
 
 1. **Create a feature branch**:
-   ```bash
+   ```powershell
    git checkout -b feature/your-feature-name
    ```
 2. **Make your changes** following the coding standards below
 3. **Test your changes** thoroughly
 4. **Commit your changes** with clear, descriptive messages:
-   ```bash
+   ```powershell
    git commit -m "Add feature: description of what you added"
    ```
 
@@ -63,7 +64,7 @@ Thank you for your interest in contributing to RemoteReach! This document provid
 
 #### Testing
 
-- Test on multiple platforms if possible (Windows, macOS, Linux)
+- Test on Windows systems with different configurations
 - Test with different devices (phones, tablets, desktop browsers)
 - Verify that existing functionality still works
 - Test edge cases and error conditions
@@ -71,7 +72,7 @@ Thank you for your interest in contributing to RemoteReach! This document provid
 #### Submitting Pull Requests
 
 1. **Push your changes** to your fork:
-   ```bash
+   ```powershell
    git push origin feature/your-feature-name
    ```
 2. **Create a pull request** on GitHub

@@ -9,7 +9,7 @@ A wireless touchpad and keyboard controller that allows you to control your comp
 - **Mouse Actions**: Left click, right click, double click, and scrolling
 - **Virtual Keyboard**: Type text and use keyboard shortcuts
 - **Responsive Design**: Works on phones, tablets, and other touch devices
-- **Cross-Platform**: Compatible with Windows, macOS, and Linux
+- **Windows-Only**: Designed specifically for Windows systems
 
 ## Screenshots
 
@@ -25,50 +25,38 @@ A wireless touchpad and keyboard controller that allows you to control your comp
 ### Step-by-Step Installation
 
 1. **Download or Clone the Project**:
-   ```bash
+   ```powershell
    git clone <repository-url>
    cd RemoteReach
    ```
 
 2. **Install Python Dependencies**:
-   ```bash
+   ```powershell
    pip install -r requirements.txt
    ```
    
    **Alternative installation** (if you prefer to install packages individually):
-   ```bash
+   ```powershell
    pip install Flask==3.0.0 Flask-SocketIO==5.3.6 PyAutoGUI==0.9.54 Pillow==10.1.0 numpy==1.24.3 eventlet==0.33.3 python-socketio==5.9.0
    ```
 
 3. **Verify Installation**:
-   ```bash
+   ```powershell
    python -c "import flask, flask_socketio, pyautogui; print('All dependencies installed successfully!')"
    ```
 
-### Platform-Specific Setup
+### Windows Setup
 
-#### Windows
 - No additional setup required
 - Windows Defender may prompt for permissions when first running
-
-#### macOS
-- Grant accessibility permissions to Terminal or Python in **System Preferences → Security & Privacy → Privacy → Accessibility**
-- You may need to allow the application through macOS security settings
-
-#### Linux
-- Install additional GUI automation dependencies:
-  ```bash
-  sudo apt-get install python3-tk python3-dev
-  # For Ubuntu/Debian
-  sudo apt-get install scrot python3-xlib
-  ```
+- Make sure to allow the application through Windows security settings if prompted
 
 ## Usage
 
 ### Quick Start
 
 1. **Start the Server**:
-   ```bash
+   ```powershell
    python app.py
    ```
    
@@ -92,11 +80,11 @@ A wireless touchpad and keyboard controller that allows you to control your comp
 ### Advanced Usage
 
 #### Keyboard Shortcuts
-The virtual keyboard supports common shortcuts:
+The virtual keyboard supports common Windows shortcuts:
 - **Ctrl+C**, **Ctrl+V**, **Ctrl+Z** (Copy, Paste, Undo)
 - **Alt+Tab** (Window switching)
 - **Ctrl+Alt+Del** (Windows task manager)
-- **Cmd+Space** (macOS Spotlight search)
+- **Windows+L** (Lock screen)
 
 #### Settings Explanation
 - **Sensitivity**: How fast the cursor moves (1-10 scale)
@@ -132,9 +120,8 @@ This application allows remote control of your computer. Please observe these se
 
 - **Network Security**: Only use on trusted networks
 - **Firewall**: Ensure your firewall settings are appropriate for your security needs
-- **Secret Key**: For production use, set a custom SECRET_KEY environment variable:
-  ```bash
-  export SECRET_KEY="your-secure-random-key-here"
+- **Secret Key**: For production use, set a custom SECRET_KEY environment variable:  ```powershell
+  set SECRET_KEY=your-secure-random-key-here
   python app.py
   ```
 - **Access Control**: The application doesn't include authentication - consider network-level access controls if needed
@@ -143,15 +130,13 @@ This application allows remote control of your computer. Please observe these se
 
 ### Common Issues
 
-1. **"Permission denied" on macOS/Linux**: You may need to grant accessibility permissions to Terminal or Python
-2. **Firewall blocking connections**: Ensure your firewall allows incoming connections on the port being used
-3. **PyAutoGUI not working**: Install the required dependencies for your operating system
+1. **Firewall blocking connections**: Ensure your Windows firewall allows incoming connections on the port being used
+2. **PyAutoGUI not working**: Make sure all Python dependencies are properly installed
+3. **Permission issues**: Run as administrator if you encounter permission problems
 
-### Platform-Specific Notes
+### Platform Notes
 
-- **macOS**: May require granting accessibility permissions in System Preferences
-- **Linux**: May need additional packages for GUI automation
-- **Windows**: Should work out of the box with the required Python packages
+- **Windows**: This application is designed specifically for Windows systems and should work out of the box with the required Python packages
 
 ## Contributing
 
