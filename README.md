@@ -71,6 +71,16 @@ A wireless touchpad and keyboard controller that allows you to control your comp
    ```bash
    python app.py
    ```
+
+   To use a custom host or port:
+   ```bash
+   python app.py --port 5000 --host 127.0.0.1
+   ```
+
+   The same can be configured with environment variables:
+   ```bash
+   PORT=5000 HOST=127.0.0.1 python app.py
+   ```
    
    The server will automatically:
    - Find an available port (starting from 8080)

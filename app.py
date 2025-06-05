@@ -2,6 +2,7 @@ import importlib.util
 import sys
 import logging
 import os
+import argparse
 
 # Set up logging
 logging.basicConfig(
@@ -38,6 +39,22 @@ def get_local_ip():
         return ip
     except Exception:
         return "127.0.0.1"  # Fallback to localhost
+
+# Command-line argument parsing
+def parse_args():
+    parser = argparse.ArgumentParser(description="Run the RemoteReach server")
+    parser.add_argument(
+        "--host",
+        default=os.environ.get("HOST", "0.0.0.0"),
+        help="Host interface to bind to (default from HOST env or 0.0.0.0)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=int(os.environ.get("PORT", 8080)),
+        help="Preferred port (default from PORT env or 8080)",
+    )
+    return parser.parse_args()
 
 # Configure pyautogui
 pyautogui.FAILSAFE = True  # Move mouse to upper left to abort
@@ -205,20 +222,20 @@ def find_available_port(start_port, max_attempts=10):
 
 # Main execution
 if __name__ == '__main__':
+    args = parse_args()
     local_ip = get_local_ip()
-    
-    # Start with port 8080 and try to find an available one
-    start_port = 8080
+
+    start_port = args.port
     port = find_available_port(start_port)
     if port is None:
         logger.error(f"Could not find an available port after trying {start_port} through {start_port + 9}")
         sys.exit(1)
-    
+
     logger.info(f"RemoteReach server running at http://localhost:{port}")
     logger.info(f"Connect from your phone by using: http://{local_ip}:{port}")
-    
+
     try:
-        socketio.run(app, host='0.0.0.0', port=port, debug=False, allow_unsafe_werkzeug=True)
+        socketio.run(app, host=args.host, port=port, debug=False, allow_unsafe_werkzeug=True)
     except OSError as e:
         logger.error(f"Error starting server: {e}")
         sys.exit(1)
